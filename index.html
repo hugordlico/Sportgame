@@ -8,38 +8,47 @@
 body{
   margin:0;
   font-family:Arial;
-  background:#0f2027;
+  background: url('IMG_4544.jpeg') no-repeat center center fixed;
+  background-size: cover;
   color:white;
 }
+
 header{
-  background:#1c2b36;
+  background:rgba(28,43,54,0.9);
   padding:15px;
   text-align:center;
   font-size:20px;
 }
+
 nav{
   position:fixed;
   bottom:0;
   width:100%;
-  background:#1c2b36;
+  background:rgba(28,43,54,0.95);
   display:flex;
   justify-content:space-around;
   padding:10px 0;
 }
+
 nav button{
   background:none;
   border:none;
   color:white;
   font-size:14px;
 }
+
 .section{
   display:none;
   padding:20px;
   padding-bottom:80px;
+  background:rgba(0,0,0,0.6);
+  min-height:100vh;
 }
+
 .active{
   display:block;
 }
+
 input,button,select,textarea{
   padding:8px;
   margin:5px 0;
@@ -47,6 +56,13 @@ input,button,select,textarea{
   border:none;
   width:100%;
 }
+
+button{
+  background:#1c2b36;
+  color:white;
+  cursor:pointer;
+}
+
 .card{
   background:white;
   color:black;
@@ -132,20 +148,17 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
 import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAiw_ozqt7wuDIQQk-YR9gKtgRS",
-  authDomain: "sportgame-64bf1.firebaseapp.com",
-  projectId: "sportgame-64bf1",
-  storageBucket: "sportgame-64bf1.appspot.com",
-  messagingSenderId: "644038182748",
-  appId: "1:644038182748:web:f8eae86bb743c8",
-  measurementId: "G-6LSFB9ZDFK"
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-console.log("Firebase conectado correctamente");
 
 window.guardarPerfil = async function() {
   const user = auth.currentUser;
@@ -172,7 +185,6 @@ window.guardarPerfil = async function() {
 
     alert("Perfil guardado correctamente 🔥");
   } catch (error) {
-    console.error(error);
     alert("Error al guardar perfil");
   }
 };
@@ -203,7 +215,6 @@ window.enviarMensajeContacto = async function() {
     document.getElementById("contactoMensaje").value="";
 
   }catch(error){
-    console.error(error);
     alert("Error al enviar mensaje");
   }
 
