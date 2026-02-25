@@ -4,224 +4,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SportGame</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
 <style>
 body{
   margin:0;
   font-family:Arial;
   background:#0f2027;
   color:white;
-  text-align:center;
 }
 
-.container{padding:15px;}
-
-.card{
-  background:white;
-  color:black;
-  border-radius:15px;
+header{
+  background:#1c2b36;
   padding:15px;
-  margin-top:15px;
+  text-align:center;
+  font-size:20px;
 }
 
-button,select,input{
+nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#1c2b36;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+}
+
+nav button{
+  background:none;
+  border:none;
+  color:white;
+  font-size:14px;
+}
+
+.section{
+  display:none;
+  padding:20px;
+  padding-bottom:80px;
+}
+
+.active{
+  display:block;
+}
+
+input,button{
   padding:8px;
-  margin:5px;
+  margin:5px 0;
   border-radius:8px;
   border:none;
 }
 
-#map{
-  height:300px;
-  margin-top:15px;
-  border-radius:15px;
-}
-
-.stars span{
-  font-size:22px;
-  cursor:pointer;
-}
-
-.messages{
-  background:#1c2b36;
+.card{
+  background:white;
+  color:black;
   padding:10px;
   border-radius:10px;
-  margin-top:20px;
-}
-
-.message{
-  background:#2c5364;
-  margin:5px 0;
-  padding:6px;
-  border-radius:6px;
-  text-align:left;
+  margin:10px 0;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>SportGame</header>
 
-<h2>SportGame</h2>
-
-<!-- FILTROS -->
-<select id="municipio">
-<option value="">Municipio</option>
-<option>Santa Cruz de Tenerife</option>
-<option>La Laguna</option>
-<option>Arona</option>
-<option>Adeje</option>
-<option>Las Palmas de Gran Canaria</option>
-<option>Telde</option>
-<option>Arrecife</option>
-<option>Puerto del Rosario</option>
-<option>Santa Cruz de La Palma</option>
-<option>San Sebastián de La Gomera</option>
-<option>Valverde</option>
-</select>
-
-<br>
-
-<label>Distancia máxima (km)</label><br>
-<input type="number" id="radius" value="15">
-
-<div id="map"></div>
-
-<!-- PERFIL TIPO SWIPE -->
-<div class="card" id="profileCard">
-  <h3 id="profileName"></h3>
-  <p id="profileSport"></p>
-  <p id="profileDistance"></p>
-
-  <button onclick="nextProfile()">❌</button>
-  <button onclick="likeProfile()">❤️</button>
-
-  <div class="stars">
-    <p>Valorar jugador:</p>
-    <span onclick="rate(1)">⭐</span>
-    <span onclick="rate(2)">⭐</span>
-    <span onclick="rate(3)">⭐</span>
-    <span onclick="rate(4)">⭐</span>
-    <span onclick="rate(5)">⭐</span>
-  </div>
-
-  <p id="ratingResult"></p>
+<!-- INICIO -->
+<div id="home" class="section active">
+  <h2>Bienvenido</h2>
+  <p>Encuentra compañeros deportivos cerca de ti.</p>
 </div>
 
 <!-- MENSAJES -->
-<div class="messages">
-<h3>📬 Bandeja de mensajes</h3>
-<div id="messageList"></div>
-<input type="text" id="newMessage" placeholder="Escribe mensaje">
-<button onclick="sendMessage()">Enviar</button>
+<div id="messages" class="section">
+  <h2>Mensajes privados</h2>
+  <div class="card">Carlos: ¿Jugamos mañana?</div>
+  <div class="card">Lucía: ¿Running esta tarde?</div>
 </div>
 
+<!-- MAPA -->
+<div id="mapSection" class="section">
+  <h2>Mapa geolocalizador</h2>
+  <p>Aquí irá el mapa interactivo.</p>
 </div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- PERFIL -->
+<div id="profile" class="section">
+  <h2>Mi perfil</h2>
+
+  <input type="file"><br>
+
+  <input type="text" placeholder="Nombre"><br>
+  <input type="email" placeholder="Email"><br>
+  <button>Cambiar contraseña</button>
+
+  <h3>Historial de partidos</h3>
+  <div class="card">Pádel vs Miguel ⭐⭐⭐⭐</div>
+  <div class="card">Fútbol vs Carlos ⭐⭐⭐</div>
+
+  <p>Puntuación media: ⭐⭐⭐⭐</p>
+</div>
+
+<!-- CONTACTO -->
+<div id="contact" class="section">
+  <h2>Contacto</h2>
+  <input type="text" placeholder="Tu mensaje"><br>
+  <button>Enviar</button>
+</div>
+
+<nav>
+  <button onclick="showSection('home')">🏠 Inicio</button>
+  <button onclick="showSection('messages')">💬 Mensajes</button>
+  <button onclick="showSection('mapSection')">🗺️ Mapa</button>
+  <button onclick="showSection('profile')">👤 Perfil</button>
+  <button onclick="showSection('contact')">📩 Contacto</button>
+</nav>
 
 <script>
-
-let userLat,userLng;
-let map;
-let index=0;
-
-const players=[
-{ name:"Carlos", sport:"Pádel", lat:28.4636, lng:-16.2518, municipio:"Santa Cruz de Tenerife"},
-{ name:"Lucía", sport:"Running", lat:28.4874, lng:-16.3159, municipio:"La Laguna"},
-{ name:"Miguel", sport:"Fútbol", lat:27.9944, lng:-15.4194, municipio:"Las Palmas de Gran Canaria"}
-];
-
-function getDistance(lat1, lon1, lat2, lon2){
-  const R=6371;
-  const dLat=(lat2-lat1)*Math.PI/180;
-  const dLon=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+
-    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-    Math.sin(dLon/2)*Math.sin(dLon/2);
-  const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  return R*c;
-}
-
-function initMap(){
-  map=L.map('map').setView([userLat,userLng],11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap'
-  }).addTo(map);
-
-  L.marker([userLat,userLng]).addTo(map)
-    .bindPopup("Tu ubicación");
-
-  loadProfile();
-  showPlayers();
-}
-
-function showPlayers(){
-  const radius=document.getElementById("radius").value;
-  const municipio=document.getElementById("municipio").value;
-
-  players.forEach(p=>{
-    const d=getDistance(userLat,userLng,p.lat,p.lng);
-    if(d<=radius && (municipio===""||municipio===p.municipio)){
-      L.marker([p.lat,p.lng]).addTo(map)
-      .bindPopup(p.name+" - "+p.sport+"<br>"+d.toFixed(1)+" km");
-    }
+function showSection(id){
+  document.querySelectorAll('.section').forEach(sec=>{
+    sec.classList.remove('active');
   });
+  document.getElementById(id).classList.add('active');
 }
-
-function loadProfile(){
-  const p=players[index];
-  const d=getDistance(userLat,userLng,p.lat,p.lng);
-  document.getElementById("profileName").innerText=p.name;
-  document.getElementById("profileSport").innerText=p.sport;
-  document.getElementById("profileDistance").innerText="📍 "+d.toFixed(1)+" km";
-}
-
-function nextProfile(){
-  index=(index+1)%players.length;
-  loadProfile();
-}
-
-function likeProfile(){
-  alert("¡Match con "+players[index].name+"!");
-  nextProfile();
-}
-
-function rate(stars){
-  document.getElementById("ratingResult").innerText=
-  "Has valorado con "+stars+" estrellas";
-}
-
-function sendMessage(){
-  const msg=document.getElementById("newMessage").value;
-  if(msg==="") return;
-  document.getElementById("messageList").innerHTML+=
-  `<div class="message">Tú: ${msg}</div>`;
-  document.getElementById("newMessage").value="";
-}
-
-navigator.geolocation.getCurrentPosition(pos=>{
-  userLat=pos.coords.latitude;
-  userLng=pos.coords.longitude;
-  initMap();
-});
-
-document.getElementById("radius").addEventListener("input",()=>{
-  map.eachLayer(l=>{
-    if(l instanceof L.Marker) map.removeLayer(l);
-  });
-  initMap();
-});
-
-document.getElementById("municipio").addEventListener("change",()=>{
-  map.eachLayer(l=>{
-    if(l instanceof L.Marker) map.removeLayer(l);
-  });
-  initMap();
-});
-
 </script>
 
 </body>
