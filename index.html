@@ -77,7 +77,6 @@ button{
 
 <header>SportGame</header>
 
-<!-- LOGIN -->
 <div style="padding:20px; background:rgba(0,0,0,0.6);">
   <h3>Acceso</h3>
   <input type="email" id="loginEmail" placeholder="Email">
@@ -88,20 +87,17 @@ button{
   <p id="usuarioActivo"></p>
 </div>
 
-<!-- INICIO -->
 <div id="home" class="section active">
   <h2>Bienvenido</h2>
   <p>Encuentra compañeros deportivos cerca de ti.</p>
 </div>
 
-<!-- MAPA -->
 <div id="mapSection" class="section">
   <h2>Mapa geolocalizador</h2>
   <button onclick="obtenerUbicacion()">Mostrar mi ubicación</button>
   <div id="map"></div>
 </div>
 
-<!-- PERFIL -->
 <div id="profile" class="section">
   <h2>Mi perfil</h2>
   <input type="text" id="perfilNombre" placeholder="Nombre">
@@ -116,7 +112,6 @@ button{
   <button onclick="guardarPerfil()">Guardar perfil</button>
 </div>
 
-<!-- CONTACTO -->
 <div id="contact" class="section">
   <h2>Contacto</h2>
   <input type="text" id="contactoNombre" placeholder="Tu nombre">
@@ -154,12 +149,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE_BUCKET",
-  messagingSenderId: "TU_MESSAGING_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyAiw_ozqt7wuDIQQk-YR9gKtgRShQM_iFY",
+  authDomain: "sportgame-64bf1.firebaseapp.com",
+  projectId: "sportgame-64bf1",
+  storageBucket: "sportgame-64bf1.firebasestorage.app",
+  messagingSenderId: "644038182748",
+  appId: "1:644038182748:web:f8eae86bb743c868436399",
+  measurementId: "G-6LSFB9ZDFK"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -167,17 +163,17 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 window.registrarse = async function(){
-  const email = loginEmail.value;
-  const password = loginPassword.value;
-  await createUserWithEmailAndPassword(auth,email,password);
-  alert("Usuario registrado ✅");
+  try{
+    await createUserWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
+    alert("Usuario registrado ✅");
+  }catch(e){ alert(e.message); }
 }
 
 window.iniciarSesion = async function(){
-  const email = loginEmail.value;
-  const password = loginPassword.value;
-  await signInWithEmailAndPassword(auth,email,password);
-  alert("Sesión iniciada ✅");
+  try{
+    await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
+    alert("Sesión iniciada ✅");
+  }catch(e){ alert(e.message); }
 }
 
 window.cerrarSesion = async function(){
@@ -186,11 +182,9 @@ window.cerrarSesion = async function(){
 }
 
 onAuthStateChanged(auth,(user)=>{
-  if(user){
-    usuarioActivo.innerText="Conectado como: "+user.email;
-  }else{
-    usuarioActivo.innerText="No has iniciado sesión";
-  }
+  usuarioActivo.innerText = user 
+    ? "Conectado como: "+user.email 
+    : "No has iniciado sesión";
 });
 
 window.guardarPerfil = async function(){
@@ -237,7 +231,6 @@ window.obtenerUbicacion = function(){
       L.marker([lat,lng]).addTo(map)
         .bindPopup("Estás aquí 📍")
         .openPopup();
-
     });
   }else{
     alert("Geolocalización no soportada");
