@@ -13,36 +13,51 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      text-align: center;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 30px;
+      background: white;
+      color: black;
       border-radius: 20px;
       width: 90%;
       max-width: 350px;
-      backdrop-filter: blur(10px);
+      overflow: hidden;
+      text-align: left;
     }
 
-    h1 {
-      margin-bottom: 10px;
+    .card img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+
+    .info {
+      padding: 15px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      padding: 15px;
     }
 
     .btn {
-      display: block;
-      margin: 15px 0;
-      padding: 12px;
-      border-radius: 30px;
-      text-decoration: none;
-      font-weight: bold;
-      background: #00ff88;
-      color: black;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
     }
 
-    .btn-secondary {
-      background: white;
-      color: black;
+    .no {
+      background: #ff4d4d;
+      color: white;
+    }
+
+    .yes {
+      background: #00cc66;
+      color: white;
     }
   </style>
 </head>
@@ -50,11 +65,17 @@
 <body>
 
   <div class="card">
-    <h1>SportGame</h1>
-    <p>Encuentra personas para hacer deporte cerca de ti</p>
-
-    <a href="#" class="btn">Crear cuenta</a>
-    <a href="#" class="btn btn-secondary">Iniciar sesión</a>
+    <img src="https://images.unsplash.com/photo-1599058917212-d750089bc07e" />
+    <div class="info">
+      <h2>Carlos, 28</h2>
+      <p>Pádel - Intermedio</p>
+      <p>📍 A 3 km</p>
+      <p>⭐ 4.8 (15 partidos)</p>
+    </div>
+    <div class="buttons">
+      <button class="btn no">✖</button>
+      <button class="btn yes">✔</button>
+    </div>
   </div>
 
 </body>
