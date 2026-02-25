@@ -8,11 +8,11 @@
       margin: 0;
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: white;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      color: white;
     }
 
     .card {
@@ -23,6 +23,7 @@
       max-width: 350px;
       overflow: hidden;
       text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
     .card img {
@@ -50,33 +51,123 @@
       cursor: pointer;
     }
 
-    .no {
-      background: #ff4d4d;
-      color: white;
-    }
+    .no { background: #ff4d4d; color: white; }
+    .yes { background: #00cc66; color: white; }
 
-    .yes {
+    .match {
+      position: absolute;
+      top: 20%;
       background: #00cc66;
-      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      display: none;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="card">
-    <img src="https://images.unsplash.com/photo-1599058917212-d750089bc07e" />
-    <div class="info">
-      <h2>Carlos, 28</h2>
-      <p>Pádel - Intermedio</p>
-      <p>📍 A 3 km</p>
-      <p>⭐ 4.8 (15 partidos)</p>
-    </div>
-    <div class="buttons">
-      <button class="btn no">✖</button>
-      <button class="btn yes">✔</button>
-    </div>
+<div class="match" id="matchBox">¡MATCH! 🎉</div>
+
+<div class="card">
+  <img id="photo" />
+  <div class="info">
+    <h2 id="name"></h2>
+    <p id="sport"></p>
+    <p id="distance"></p>
+    <p id="rating"></p>
   </div>
+  <div class="buttons">
+    <button class="btn no" onclick="nextProfile()">✖</button>
+    <button class="btn yes" onclick="likeProfile()">✔</button>
+  </div>
+</div>
+
+<script>
+
+let userLocation = null;
+
+const profiles = [
+  {
+    name: "Carlos, 28",
+    sport: "Pádel - Intermedio",
+    lat: 40.4168,
+    lng: -3.7038,
+    rating: "⭐ 4.8 (15 partidos)",
+    photo: "https://images.unsplash.com/photo-1599058917212-d750089bc07e"
+  },
+  {
+    name: "Lucía, 25",
+    sport: "Running - Avanzado",
+    lat: 40.4268,
+    lng: -3.6938,
+    rating: "⭐ 4.6 (22 partidos)",
+    photo: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d"
+  }
+];
+
+let index = 0;
+
+function toRad(x) {
+  return x * Math.PI / 180;
+}
+
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return (R * c).toFixed(1);
+}
+
+function loadProfile() {
+  const profile = profiles[index];
+  document.getElementById("name").innerText = profile.name;
+  document.getElementById("sport").innerText = profile.sport;
+  document.getElementById("rating").innerText = profile.rating;
+  document.getElementById("photo").src = profile.photo;
+
+  if(userLocation){
+    const distance = getDistance(
+      userLocation.latitude,
+      userLocation.longitude,
+      profile.lat,
+      profile.lng
+    );
+    document.getElementById("distance").innerText = "📍 A " + distance + " km";
+  } else {
+    document.getElementById("distance").innerText = "📍 Calculando...";
+  }
+}
+
+function nextProfile() {
+  index = (index + 1) % profiles.length;
+  loadProfile();
+}
+
+function likeProfile() {
+  document.getElementById("matchBox").style.display = "block";
+  setTimeout(() => {
+    document.getElementById("matchBox").style.display = "none";
+    nextProfile();
+  }, 1500);
+}
+
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(position => {
+    userLocation = position.coords;
+    loadProfile();
+  });
+} else {
+  loadProfile();
+}
+
+</script>
 
 </body>
 </html>
