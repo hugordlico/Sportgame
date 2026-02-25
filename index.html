@@ -11,14 +11,12 @@ body{
   background:#0f2027;
   color:white;
 }
-
 header{
   background:#1c2b36;
   padding:15px;
   text-align:center;
   font-size:20px;
 }
-
 nav{
   position:fixed;
   bottom:0;
@@ -28,31 +26,27 @@ nav{
   justify-content:space-around;
   padding:10px 0;
 }
-
 nav button{
   background:none;
   border:none;
   color:white;
   font-size:14px;
 }
-
 .section{
   display:none;
   padding:20px;
   padding-bottom:80px;
 }
-
 .active{
   display:block;
 }
-
-input,button{
+input,button,select,textarea{
   padding:8px;
   margin:5px 0;
   border-radius:8px;
   border:none;
+  width:100%;
 }
-
 .card{
   background:white;
   color:black;
@@ -76,38 +70,44 @@ input,button{
 <!-- MENSAJES -->
 <div id="messages" class="section">
   <h2>Mensajes privados</h2>
-  <div class="card">Carlos: ¿Jugamos mañana?</div>
-  <div class="card">Lucía: ¿Running esta tarde?</div>
+  <div id="listaMensajes"></div>
 </div>
 
 <!-- MAPA -->
 <div id="mapSection" class="section">
   <h2>Mapa geolocalizador</h2>
-  <p>Aquí irá el mapa interactivo.</p>
+  <p>Próximamente mapa con usuarios cercanos.</p>
 </div>
 
 <!-- PERFIL -->
 <div id="profile" class="section">
   <h2>Mi perfil</h2>
 
-  <input type="file"><br>
+  <input type="text" id="perfilNombre" placeholder="Nombre">
+  
+  <select id="perfilMunicipio">
+    <option value="">Selecciona municipio</option>
+    <option>Las Palmas</option>
+    <option>Santa Cruz de Tenerife</option>
+    <option>La Laguna</option>
+    <option>Telde</option>
+  </select>
 
-  <input type="text" placeholder="Nombre"><br>
-  <input type="email" placeholder="Email"><br>
-  <button>Cambiar contraseña</button>
+  <input type="text" id="perfilDeporte" placeholder="Deporte favorito">
+
+  <button onclick="guardarPerfil()">Guardar perfil</button>
 
   <h3>Historial de partidos</h3>
-  <div class="card">Pádel vs Miguel ⭐⭐⭐⭐</div>
-  <div class="card">Fútbol vs Carlos ⭐⭐⭐</div>
-
-  <p>Puntuación media: ⭐⭐⭐⭐</p>
+  <div id="historial"></div>
 </div>
 
 <!-- CONTACTO -->
 <div id="contact" class="section">
   <h2>Contacto</h2>
-  <input type="text" placeholder="Tu mensaje"><br>
-  <button>Enviar</button>
+  <input type="text" id="contactoNombre" placeholder="Tu nombre">
+  <input type="email" id="contactoEmail" placeholder="Tu email">
+  <textarea id="contactoMensaje" placeholder="Tu mensaje"></textarea>
+  <button onclick="enviarMensajeContacto()">Enviar</button>
 </div>
 
 <nav>
@@ -118,26 +118,97 @@ input,button{
   <button onclick="showSection('contact')">📩 Contacto</button>
 </nav>
 
+<script>
+function showSection(id){
+  document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAiw_ozqt7wuDIQQk-YR9gKtgRS",
-    authDomain: "sportgame-64bf1.firebaseapp.com",
-    projectId: "sportgame-64bf1",
-    storageBucket: "sportgame-64bf1.appspot.com",
-    messagingSenderId: "644038182748",
-    appId: "1:644038182748:web:f8eae86bb743c8",
-    measurementId: "G-6LSFB9ZDFK"
-  };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyAiw_ozqt7wuDIQQk-YR9gKtgRS",
+  authDomain: "sportgame-64bf1.firebaseapp.com",
+  projectId: "sportgame-64bf1",
+  storageBucket: "sportgame-64bf1.appspot.com",
+  messagingSenderId: "644038182748",
+  appId: "1:644038182748:web:f8eae86bb743c8",
+  measurementId: "G-6LSFB9ZDFK"
+};
 
-  console.log("Firebase conectado correctamente");
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+console.log("Firebase conectado correctamente");
+
+window.guardarPerfil = async function() {
+  const user = auth.currentUser;
+
+  if (!user) {
+    alert("Debes iniciar sesión primero.");
+    return;
+  }
+
+  const nombre = document.getElementById("perfilNombre").value;
+  const municipio = document.getElementById("perfilMunicipio").value;
+  const deporte = document.getElementById("perfilDeporte").value;
+
+  try {
+    await setDoc(doc(db, "usuarios", user.uid), {
+      nombre,
+      municipio,
+      deporte,
+      email: user.email,
+      estrellas: 0,
+      partidosJugados: 0,
+      fechaRegistro: new Date()
+    });
+
+    alert("Perfil guardado correctamente 🔥");
+  } catch (error) {
+    console.error(error);
+    alert("Error al guardar perfil");
+  }
+};
+
+window.enviarMensajeContacto = async function() {
+
+  const nombre = document.getElementById("contactoNombre").value;
+  const email = document.getElementById("contactoEmail").value;
+  const mensaje = document.getElementById("contactoMensaje").value;
+
+  if(!nombre || !email || !mensaje){
+    alert("Completa todos los campos");
+    return;
+  }
+
+  try{
+    await addDoc(collection(db,"mensajesContacto"),{
+      nombre,
+      email,
+      mensaje,
+      fecha: new Date()
+    });
+
+    alert("Mensaje enviado correctamente ✅");
+
+    document.getElementById("contactoNombre").value="";
+    document.getElementById("contactoEmail").value="";
+    document.getElementById("contactoMensaje").value="";
+
+  }catch(error){
+    console.error(error);
+    alert("Error al enviar mensaje");
+  }
+
+};
+
 </script>
 
 </body>
