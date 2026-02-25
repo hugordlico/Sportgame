@@ -7,166 +7,145 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      background: #0f2027;
       color: white;
+      text-align: center;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    select, button {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 10px;
+      border: none;
     }
 
     .card {
       background: white;
       color: black;
       border-radius: 20px;
-      width: 90%;
-      max-width: 350px;
-      overflow: hidden;
-      text-align: left;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
-    .card img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-    }
-
-    .info {
+      margin-top: 20px;
       padding: 15px;
     }
 
-    .buttons {
-      display: flex;
-      justify-content: space-around;
-      padding: 15px;
-    }
-
-    .btn {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      border: none;
-      font-size: 20px;
+    .stars span {
+      font-size: 25px;
       cursor: pointer;
     }
 
-    .no { background: #ff4d4d; color: white; }
-    .yes { background: #00cc66; color: white; }
+    .messages {
+      margin-top: 30px;
+      background: #1c2b36;
+      padding: 15px;
+      border-radius: 15px;
+    }
 
-    .match {
-      position: absolute;
-      top: 20%;
-      background: #00cc66;
-      padding: 15px 25px;
-      border-radius: 10px;
-      display: none;
-      font-weight: bold;
+    .message {
+      background: #2c5364;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 8px;
+      text-align: left;
     }
   </style>
 </head>
-
 <body>
 
-<div class="match" id="matchBox">¡MATCH! 🎉</div>
+<div class="container">
 
-<div class="card">
-  <img id="photo" />
-  <div class="info">
-    <h2 id="name"></h2>
-    <p id="sport"></p>
-    <p id="distance"></p>
-    <p id="rating"></p>
+  <h2>Buscar por Municipio</h2>
+
+  <select id="municipio">
+    <option value="">Seleccionar municipio</option>
+
+    <!-- Tenerife -->
+    <option>Adeje</option>
+    <option>Arona</option>
+    <option>La Laguna</option>
+    <option>Santa Cruz de Tenerife</option>
+    <option>Puerto de la Cruz</option>
+    <option>Granadilla de Abona</option>
+    <option>Guía de Isora</option>
+    <option>Los Realejos</option>
+    <option>El Rosario</option>
+    <option>Candelaria</option>
+
+    <!-- Gran Canaria -->
+    <option>Las Palmas de Gran Canaria</option>
+    <option>Telde</option>
+    <option>Santa Lucía de Tirajana</option>
+    <option>Arucas</option>
+    <option>Ingenio</option>
+    <option>Gáldar</option>
+    <option>Mogán</option>
+    <option>Agüimes</option>
+    <option>Teror</option>
+    <option>Firgas</option>
+
+    <!-- Lanzarote -->
+    <option>Arrecife</option>
+    <option>Tías</option>
+    <option>Yaiza</option>
+    <option>Teguise</option>
+    <option>San Bartolomé</option>
+    <option>Haría</option>
+
+    <!-- Fuerteventura -->
+    <option>Puerto del Rosario</option>
+    <option>La Oliva</option>
+    <option>Pájara</option>
+    <option>Tuineje</option>
+    <option>Antigua</option>
+    <option>Betancuria</option>
+
+    <!-- La Palma -->
+    <option>Santa Cruz de La Palma</option>
+    <option>Los Llanos de Aridane</option>
+    <option>El Paso</option>
+
+    <!-- La Gomera -->
+    <option>San Sebastián de La Gomera</option>
+
+    <!-- El Hierro -->
+    <option>Valverde</option>
+
+  </select>
+
+  <div class="card">
+    <h3>Carlos - Pádel</h3>
+    <p>Municipio: <span id="selectedMunicipio">No seleccionado</span></p>
+
+    <div class="stars">
+      <span onclick="rate(1)">⭐</span>
+      <span onclick="rate(2)">⭐</span>
+      <span onclick="rate(3)">⭐</span>
+      <span onclick="rate(4)">⭐</span>
+      <span onclick="rate(5)">⭐</span>
+    </div>
+
+    <p id="ratingResult"></p>
   </div>
-  <div class="buttons">
-    <button class="btn no" onclick="nextProfile()">✖</button>
-    <button class="btn yes" onclick="likeProfile()">✔</button>
+
+  <div class="messages">
+    <h3>📬 Bandeja de mensajes</h3>
+    <div class="message">Lucía: ¿Jugamos mañana?</div>
+    <div class="message">Miguel: Estoy libre el sábado</div>
   </div>
+
 </div>
 
 <script>
-
-let userLocation = null;
-
-const profiles = [
-  {
-    name: "Carlos, 28",
-    sport: "Pádel - Intermedio",
-    lat: 40.4168,
-    lng: -3.7038,
-    rating: "⭐ 4.8 (15 partidos)",
-    photo: "https://images.unsplash.com/photo-1599058917212-d750089bc07e"
-  },
-  {
-    name: "Lucía, 25",
-    sport: "Running - Avanzado",
-    lat: 40.4268,
-    lng: -3.6938,
-    rating: "⭐ 4.6 (22 partidos)",
-    photo: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d"
-  }
-];
-
-let index = 0;
-
-function toRad(x) {
-  return x * Math.PI / 180;
-}
-
-function getDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return (R * c).toFixed(1);
-}
-
-function loadProfile() {
-  const profile = profiles[index];
-  document.getElementById("name").innerText = profile.name;
-  document.getElementById("sport").innerText = profile.sport;
-  document.getElementById("rating").innerText = profile.rating;
-  document.getElementById("photo").src = profile.photo;
-
-  if(userLocation){
-    const distance = getDistance(
-      userLocation.latitude,
-      userLocation.longitude,
-      profile.lat,
-      profile.lng
-    );
-    document.getElementById("distance").innerText = "📍 A " + distance + " km";
-  } else {
-    document.getElementById("distance").innerText = "📍 Calculando...";
-  }
-}
-
-function nextProfile() {
-  index = (index + 1) % profiles.length;
-  loadProfile();
-}
-
-function likeProfile() {
-  document.getElementById("matchBox").style.display = "block";
-  setTimeout(() => {
-    document.getElementById("matchBox").style.display = "none";
-    nextProfile();
-  }, 1500);
-}
-
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(position => {
-    userLocation = position.coords;
-    loadProfile();
+  document.getElementById("municipio").addEventListener("change", function(){
+    document.getElementById("selectedMunicipio").innerText = this.value;
   });
-} else {
-  loadProfile();
-}
 
+  function rate(stars){
+    document.getElementById("ratingResult").innerText =
+      "Has valorado con " + stars + " estrellas ⭐";
+  }
 </script>
 
 </body>
