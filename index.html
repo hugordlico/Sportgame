@@ -1,151 +1,227 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SportGame</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f2027;
-      color: white;
-      text-align: center;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SportGame</title>
 
-    .container {
-      padding: 20px;
-    }
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
-    select, button {
-      padding: 10px;
-      margin: 10px;
-      border-radius: 10px;
-      border: none;
-    }
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f2027;
+  color:white;
+  text-align:center;
+}
 
-    .card {
-      background: white;
-      color: black;
-      border-radius: 20px;
-      margin-top: 20px;
-      padding: 15px;
-    }
+.container{padding:15px;}
 
-    .stars span {
-      font-size: 25px;
-      cursor: pointer;
-    }
+.card{
+  background:white;
+  color:black;
+  border-radius:15px;
+  padding:15px;
+  margin-top:15px;
+}
 
-    .messages {
-      margin-top: 30px;
-      background: #1c2b36;
-      padding: 15px;
-      border-radius: 15px;
-    }
+button,select,input{
+  padding:8px;
+  margin:5px;
+  border-radius:8px;
+  border:none;
+}
 
-    .message {
-      background: #2c5364;
-      margin: 5px 0;
-      padding: 8px;
-      border-radius: 8px;
-      text-align: left;
-    }
-  </style>
+#map{
+  height:300px;
+  margin-top:15px;
+  border-radius:15px;
+}
+
+.stars span{
+  font-size:22px;
+  cursor:pointer;
+}
+
+.messages{
+  background:#1c2b36;
+  padding:10px;
+  border-radius:10px;
+  margin-top:20px;
+}
+
+.message{
+  background:#2c5364;
+  margin:5px 0;
+  padding:6px;
+  border-radius:6px;
+  text-align:left;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
 
-  <h2>Buscar por Municipio</h2>
+<h2>SportGame</h2>
 
-  <select id="municipio">
-    <option value="">Seleccionar municipio</option>
+<!-- FILTROS -->
+<select id="municipio">
+<option value="">Municipio</option>
+<option>Santa Cruz de Tenerife</option>
+<option>La Laguna</option>
+<option>Arona</option>
+<option>Adeje</option>
+<option>Las Palmas de Gran Canaria</option>
+<option>Telde</option>
+<option>Arrecife</option>
+<option>Puerto del Rosario</option>
+<option>Santa Cruz de La Palma</option>
+<option>San Sebastián de La Gomera</option>
+<option>Valverde</option>
+</select>
 
-    <!-- Tenerife -->
-    <option>Adeje</option>
-    <option>Arona</option>
-    <option>La Laguna</option>
-    <option>Santa Cruz de Tenerife</option>
-    <option>Puerto de la Cruz</option>
-    <option>Granadilla de Abona</option>
-    <option>Guía de Isora</option>
-    <option>Los Realejos</option>
-    <option>El Rosario</option>
-    <option>Candelaria</option>
+<br>
 
-    <!-- Gran Canaria -->
-    <option>Las Palmas de Gran Canaria</option>
-    <option>Telde</option>
-    <option>Santa Lucía de Tirajana</option>
-    <option>Arucas</option>
-    <option>Ingenio</option>
-    <option>Gáldar</option>
-    <option>Mogán</option>
-    <option>Agüimes</option>
-    <option>Teror</option>
-    <option>Firgas</option>
+<label>Distancia máxima (km)</label><br>
+<input type="number" id="radius" value="15">
 
-    <!-- Lanzarote -->
-    <option>Arrecife</option>
-    <option>Tías</option>
-    <option>Yaiza</option>
-    <option>Teguise</option>
-    <option>San Bartolomé</option>
-    <option>Haría</option>
+<div id="map"></div>
 
-    <!-- Fuerteventura -->
-    <option>Puerto del Rosario</option>
-    <option>La Oliva</option>
-    <option>Pájara</option>
-    <option>Tuineje</option>
-    <option>Antigua</option>
-    <option>Betancuria</option>
+<!-- PERFIL TIPO SWIPE -->
+<div class="card" id="profileCard">
+  <h3 id="profileName"></h3>
+  <p id="profileSport"></p>
+  <p id="profileDistance"></p>
 
-    <!-- La Palma -->
-    <option>Santa Cruz de La Palma</option>
-    <option>Los Llanos de Aridane</option>
-    <option>El Paso</option>
+  <button onclick="nextProfile()">❌</button>
+  <button onclick="likeProfile()">❤️</button>
 
-    <!-- La Gomera -->
-    <option>San Sebastián de La Gomera</option>
-
-    <!-- El Hierro -->
-    <option>Valverde</option>
-
-  </select>
-
-  <div class="card">
-    <h3>Carlos - Pádel</h3>
-    <p>Municipio: <span id="selectedMunicipio">No seleccionado</span></p>
-
-    <div class="stars">
-      <span onclick="rate(1)">⭐</span>
-      <span onclick="rate(2)">⭐</span>
-      <span onclick="rate(3)">⭐</span>
-      <span onclick="rate(4)">⭐</span>
-      <span onclick="rate(5)">⭐</span>
-    </div>
-
-    <p id="ratingResult"></p>
+  <div class="stars">
+    <p>Valorar jugador:</p>
+    <span onclick="rate(1)">⭐</span>
+    <span onclick="rate(2)">⭐</span>
+    <span onclick="rate(3)">⭐</span>
+    <span onclick="rate(4)">⭐</span>
+    <span onclick="rate(5)">⭐</span>
   </div>
 
-  <div class="messages">
-    <h3>📬 Bandeja de mensajes</h3>
-    <div class="message">Lucía: ¿Jugamos mañana?</div>
-    <div class="message">Miguel: Estoy libre el sábado</div>
-  </div>
+  <p id="ratingResult"></p>
+</div>
+
+<!-- MENSAJES -->
+<div class="messages">
+<h3>📬 Bandeja de mensajes</h3>
+<div id="messageList"></div>
+<input type="text" id="newMessage" placeholder="Escribe mensaje">
+<button onclick="sendMessage()">Enviar</button>
+</div>
 
 </div>
 
-<script>
-  document.getElementById("municipio").addEventListener("change", function(){
-    document.getElementById("selectedMunicipio").innerText = this.value;
-  });
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  function rate(stars){
-    document.getElementById("ratingResult").innerText =
-      "Has valorado con " + stars + " estrellas ⭐";
-  }
+<script>
+
+let userLat,userLng;
+let map;
+let index=0;
+
+const players=[
+{ name:"Carlos", sport:"Pádel", lat:28.4636, lng:-16.2518, municipio:"Santa Cruz de Tenerife"},
+{ name:"Lucía", sport:"Running", lat:28.4874, lng:-16.3159, municipio:"La Laguna"},
+{ name:"Miguel", sport:"Fútbol", lat:27.9944, lng:-15.4194, municipio:"Las Palmas de Gran Canaria"}
+];
+
+function getDistance(lat1, lon1, lat2, lon2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+    Math.sin(dLon/2)*Math.sin(dLon/2);
+  const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  return R*c;
+}
+
+function initMap(){
+  map=L.map('map').setView([userLat,userLng],11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap'
+  }).addTo(map);
+
+  L.marker([userLat,userLng]).addTo(map)
+    .bindPopup("Tu ubicación");
+
+  loadProfile();
+  showPlayers();
+}
+
+function showPlayers(){
+  const radius=document.getElementById("radius").value;
+  const municipio=document.getElementById("municipio").value;
+
+  players.forEach(p=>{
+    const d=getDistance(userLat,userLng,p.lat,p.lng);
+    if(d<=radius && (municipio===""||municipio===p.municipio)){
+      L.marker([p.lat,p.lng]).addTo(map)
+      .bindPopup(p.name+" - "+p.sport+"<br>"+d.toFixed(1)+" km");
+    }
+  });
+}
+
+function loadProfile(){
+  const p=players[index];
+  const d=getDistance(userLat,userLng,p.lat,p.lng);
+  document.getElementById("profileName").innerText=p.name;
+  document.getElementById("profileSport").innerText=p.sport;
+  document.getElementById("profileDistance").innerText="📍 "+d.toFixed(1)+" km";
+}
+
+function nextProfile(){
+  index=(index+1)%players.length;
+  loadProfile();
+}
+
+function likeProfile(){
+  alert("¡Match con "+players[index].name+"!");
+  nextProfile();
+}
+
+function rate(stars){
+  document.getElementById("ratingResult").innerText=
+  "Has valorado con "+stars+" estrellas";
+}
+
+function sendMessage(){
+  const msg=document.getElementById("newMessage").value;
+  if(msg==="") return;
+  document.getElementById("messageList").innerHTML+=
+  `<div class="message">Tú: ${msg}</div>`;
+  document.getElementById("newMessage").value="";
+}
+
+navigator.geolocation.getCurrentPosition(pos=>{
+  userLat=pos.coords.latitude;
+  userLng=pos.coords.longitude;
+  initMap();
+});
+
+document.getElementById("radius").addEventListener("input",()=>{
+  map.eachLayer(l=>{
+    if(l instanceof L.Marker) map.removeLayer(l);
+  });
+  initMap();
+});
+
+document.getElementById("municipio").addEventListener("change",()=>{
+  map.eachLayer(l=>{
+    if(l instanceof L.Marker) map.removeLayer(l);
+  });
+  initMap();
+});
+
 </script>
 
 </body>
