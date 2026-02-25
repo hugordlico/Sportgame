@@ -118,13 +118,26 @@ input,button{
   <button onclick="showSection('contact')">📩 Contacto</button>
 </nav>
 
-<script>
-function showSection(id){
-  document.querySelectorAll('.section').forEach(sec=>{
-    sec.classList.remove('active');
-  });
-  document.getElementById(id).classList.add('active');
-}
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiw_ozqt7wuDIQQk-YR9gKtgRS",
+    authDomain: "sportgame-64bf1.firebaseapp.com",
+    projectId: "sportgame-64bf1",
+    storageBucket: "sportgame-64bf1.appspot.com",
+    messagingSenderId: "644038182748",
+    appId: "1:644038182748:web:f8eae86bb743c8",
+    measurementId: "G-6LSFB9ZDFK"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  console.log("Firebase conectado correctamente");
 </script>
 
 </body>
