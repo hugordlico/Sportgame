@@ -5,14 +5,10 @@
 <title>SportGame</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins', sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 
 body{
   background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
@@ -20,7 +16,6 @@ body{
   min-height:100vh;
 }
 
-/* NAVBAR */
 nav{
   display:flex;
   justify-content:space-between;
@@ -28,77 +23,32 @@ nav{
   padding:20px 60px;
 }
 
-.logo{
-  font-size:24px;
-  font-weight:800;
-}
+.logo{font-size:24px;font-weight:800;}
 
-.menu{
-  display:flex;
-  gap:30px;
-}
+.menu{display:flex;gap:30px;}
 
-.menu a{
-  color:white;
-  text-decoration:none;
-  cursor:pointer;
-  font-weight:500;
-}
+.menu a{color:white;text-decoration:none;cursor:pointer;}
+.menu a:hover{color:#ff7a00;}
 
-.menu a:hover{
-  color:#ff7a00;
-}
-
-/* HERO */
-.hero{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:60px;
-  flex-wrap:wrap;
-}
-
-.hero-text{
-  max-width:500px;
-}
-
-.hero-text h1{
-  font-size:48px;
-  margin-bottom:20px;
-}
-
-.hero-text span{
-  color:#ff7a00;
-}
-
-.hero-text p{
-  margin-bottom:30px;
-  font-size:18px;
-}
+.section{display:none;padding:60px;}
+.active{display:block;}
 
 .btn{
   background:#ff7a00;
-  padding:15px 30px;
+  padding:12px 25px;
   border:none;
   border-radius:30px;
   font-weight:bold;
   color:white;
   cursor:pointer;
-  font-size:16px;
-  transition:0.3s;
 }
 
-.btn:hover{
-  transform:scale(1.05);
-}
-
-/* LOGIN BOX */
 .login-box{
   background:rgba(255,255,255,0.1);
   padding:30px;
   border-radius:20px;
   max-width:400px;
-  backdrop-filter: blur(10px);
+  backdrop-filter:blur(10px);
 }
 
 input{
@@ -109,32 +59,42 @@ input{
   border-radius:10px;
 }
 
-.small-btn{
-  background:#ff7a00;
-  padding:10px;
-  border:none;
-  border-radius:10px;
+.card{
+  max-width:400px;
+  margin:auto;
+  background:white;
+  color:black;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.card img{
   width:100%;
-  margin-top:10px;
+  height:350px;
+  object-fit:cover;
+}
+
+.card-info{
+  padding:20px;
+}
+
+.acciones{
+  display:flex;
+  justify-content:space-around;
+  padding:20px;
+}
+
+.acciones button{
+  font-size:22px;
+  border:none;
+  border-radius:50%;
+  width:60px;
+  height:60px;
   cursor:pointer;
 }
 
-/* SECTIONS */
-.section{
-  display:none;
-  padding:60px;
-}
-
-.active{
-  display:block;
-}
-
-footer{
-  text-align:center;
-  padding:30px;
-  opacity:0.7;
-  margin-top:60px;
-}
+footer{text-align:center;padding:30px;opacity:0.7;margin-top:60px;}
+#map{height:300px;margin-top:30px;border-radius:20px;}
 </style>
 </head>
 
@@ -144,7 +104,6 @@ footer{
   <div class="logo">⚽ SportGame</div>
   <div class="menu">
     <a onclick="showSection('principal')">Principal</a>
-    <a onclick="showSection('partidos')">Mis Partidos</a>
     <a onclick="showSection('people')">People</a>
     <a onclick="showSection('jugador')">Jugador</a>
   </div>
@@ -152,35 +111,28 @@ footer{
 
 <!-- PRINCIPAL -->
 <div id="principal" class="section active">
-  <div class="hero">
-    <div class="hero-text">
-      <h1>Bienvenido a <span>SportGame</span></h1>
-      <p>Organiza partidos, conecta con jugadores cerca de ti.</p>
-      <button class="btn" onclick="showSection('jugador')">Inscribirme Ahora</button>
-    </div>
-
-    <div class="login-box">
-      <h3>Acceso Jugador</h3>
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPassword" placeholder="Contraseña">
-      <button class="small-btn" onclick="registrarse()">Registrarse</button>
-      <button class="small-btn" onclick="iniciarSesion()">Iniciar sesión</button>
-      <button class="small-btn" onclick="cerrarSesion()">Cerrar sesión</button>
-      <p id="usuarioActivo"></p>
-    </div>
-  </div>
-</div>
-
-<!-- PARTIDOS -->
-<div id="partidos" class="section">
-  <h2>Mis Partidos</h2>
-  <p>Aquí aparecerán los partidos creados.</p>
+  <h1>Bienvenido a SportGame</h1>
 </div>
 
 <!-- PEOPLE -->
 <div id="people" class="section">
-  <h2>People</h2>
-  <p>Aquí podrás conocer people.</p>
+  <h2>Encuentra jugadores</h2>
+
+  <div class="card">
+    <img id="fotoJugador" src="https://i.pravatar.cc/400">
+    <div class="card-info">
+      <h2 id="nombreJugador"></h2>
+      <p id="distanciaJugador"></p>
+    </div>
+
+    <div class="acciones">
+      <button onclick="rechazar()">❌</button>
+      <button onclick="darLike()">❤️</button>
+      <button onclick="favorito()">⭐</button>
+    </div>
+  </div>
+
+  <div id="map"></div>
 </div>
 
 <!-- JUGADOR -->
@@ -191,25 +143,17 @@ footer{
   <button class="btn" onclick="guardarPerfil()">Guardar Perfil</button>
 </div>
 
-<footer>
-© 2026 SportGame
-</footer>
+<footer>© 2026 SportGame</footer>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import { 
-  getFirestore, 
-  doc, 
-  setDoc 
+  getFirestore, collection, getDocs, addDoc, 
+  doc, setDoc, query, where 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -225,54 +169,129 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* AUTH */
+let jugadores=[];
+let indexActual=0;
+let miUbicacion=null;
+let map;
 
-window.registrarse = async function(){
-  try{
-    await createUserWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
-    alert("Usuario registrado ✅");
-  }catch(e){ alert(e.message); }
-}
-
-window.iniciarSesion = async function(){
-  try{
-    await signInWithEmailAndPassword(auth,loginEmail.value,loginPassword.value);
-    alert("Sesión iniciada ✅");
-  }catch(e){ alert(e.message); }
-}
-
-window.cerrarSesion = async function(){
-  await signOut(auth);
-  alert("Sesión cerrada");
-}
-
-onAuthStateChanged(auth,(user)=>{
-  usuarioActivo.innerText = user 
-    ? "Conectado como: "+user.email 
-    : "No has iniciado sesión";
+/* GEOLOCALIZACIÓN */
+navigator.geolocation.getCurrentPosition(pos=>{
+  miUbicacion={
+    lat:pos.coords.latitude,
+    lng:pos.coords.longitude
+  };
 });
 
-/* PERFIL */
+/* DISTANCIA */
+function calcularDistancia(lat1,lon1,lat2,lon2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+
+    Math.cos(lat1*Math.PI/180)*
+    Math.cos(lat2*Math.PI/180)*
+    Math.sin(dLon/2)**2;
+  const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  return (R*c).toFixed(1);
+}
 
-window.guardarPerfil = async function(){
-  const user = auth.currentUser;
-  if(!user){ alert("Inicia sesión primero"); return; }
+/* CARGAR JUGADORES */
+async function cargarJugadores(){
+  const snap=await getDocs(collection(db,"jugadores"));
+  jugadores=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
+  mostrarJugador();
+  cargarMapa();
+}
+
+/* MOSTRAR TARJETA */
+function mostrarJugador(){
+  if(jugadores.length===0)return;
+  const j=jugadores[indexActual];
+
+  nombreJugador.innerText=j.nombre || "Jugador";
+  fotoJugador.src=j.foto || "https://i.pravatar.cc/400?u="+j.id;
+
+  if(j.lat && miUbicacion){
+    const dist=calcularDistancia(
+      miUbicacion.lat,miUbicacion.lng,
+      j.lat,j.lng
+    );
+    distanciaJugador.innerText=dist+" km de distancia";
+  }
+}
+
+/* LIKE */
+window.darLike=async function(){
+  const j=jugadores[indexActual];
+  await addDoc(collection(db,"likes"),{
+    from:auth.currentUser.uid,
+    to:j.id
+  });
+  comprobarMatch(j.id);
+  siguiente();
+}
+
+/* MATCH */
+async function comprobarMatch(idDestino){
+  const q=query(collection(db,"likes"),
+    where("from","==",idDestino),
+    where("to","==",auth.currentUser.uid)
+  );
+  const snap=await getDocs(q);
+  if(!snap.empty) alert("🔥 ¡MATCH!");
+}
+
+/* RECHAZAR */
+window.rechazar=function(){ siguiente(); }
+window.favorito=function(){ alert("⭐ Añadido a favoritos"); }
+
+function siguiente(){
+  indexActual++;
+  if(indexActual<jugadores.length) mostrarJugador();
+}
+
+/* MAPA */
+function cargarMapa(){
+  if(!miUbicacion)return;
+
+  map=L.map('map').setView([miUbicacion.lat,miUbicacion.lng],12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap'
+  }).addTo(map);
+
+  L.marker([miUbicacion.lat,miUbicacion.lng])
+    .addTo(map).bindPopup("Tú");
+
+  jugadores.forEach(j=>{
+    if(j.lat)
+      L.marker([j.lat,j.lng]).addTo(map)
+      .bindPopup(j.nombre);
+  });
+}
+
+/* GUARDAR PERFIL */
+window.guardarPerfil=async function(){
+  const user=auth.currentUser;
+  if(!user)return alert("Inicia sesión");
 
   await setDoc(doc(db,"jugadores",user.uid),{
     nombre:perfilNombre.value,
     deporte:perfilDeporte.value,
-    email:user.email,
+    lat:miUbicacion?.lat || null,
+    lng:miUbicacion?.lng || null,
     fecha:new Date()
   });
 
-  alert("Perfil guardado 🔥");
+  alert("Perfil guardado");
 }
 
 /* NAV */
-
-window.showSection = function(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+window.showSection=function(id){
+  document.querySelectorAll('.section')
+    .forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id==="people") cargarJugadores();
 }
 
 </script>
