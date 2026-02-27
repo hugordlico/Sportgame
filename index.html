@@ -33,30 +33,22 @@ nav{
 .section{display:none;padding:60px;}
 .active{display:block;}
 
-.btn{
-  background:#ff7a00;
-  padding:12px 25px;
-  border:none;
-  border-radius:30px;
-  font-weight:bold;
-  color:white;
-  cursor:pointer;
-}
-
-.login-box{
-  background:rgba(255,255,255,0.1);
-  padding:30px;
-  border-radius:20px;
-  max-width:400px;
-  backdrop-filter:blur(10px);
-}
-
 input{
   width:100%;
   padding:12px;
   margin:10px 0;
   border:none;
   border-radius:10px;
+}
+
+.btn{
+  background:#ff7a00;
+  padding:12px 25px;
+  border:none;
+  border-radius:30px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 .card{
@@ -74,9 +66,7 @@ input{
   object-fit:cover;
 }
 
-.card-info{
-  padding:20px;
-}
+.card-info{padding:20px;}
 
 .acciones{
   display:flex;
@@ -93,8 +83,11 @@ input{
   cursor:pointer;
 }
 
-footer{text-align:center;padding:30px;opacity:0.7;margin-top:60px;}
 #map{height:300px;margin-top:30px;border-radius:20px;}
+footer{text-align:center;padding:30px;opacity:0.7;margin-top:60px;}
+.estado{font-size:14px;margin-top:5px;}
+.online{color:green;}
+.offline{color:gray;}
 </style>
 </head>
 
@@ -105,16 +98,14 @@ footer{text-align:center;padding:30px;opacity:0.7;margin-top:60px;}
   <div class="menu">
     <a onclick="showSection('principal')">Principal</a>
     <a onclick="showSection('people')">People</a>
-    <a onclick="showSection('jugador')">Jugador</a>
+    <a onclick="showSection('perfil')">Perfil</a>
   </div>
 </nav>
 
-<!-- PRINCIPAL -->
 <div id="principal" class="section active">
   <h1>Bienvenido a SportGame</h1>
 </div>
 
-<!-- PEOPLE -->
 <div id="people" class="section">
   <h2>Encuentra jugadores</h2>
 
@@ -123,6 +114,7 @@ footer{text-align:center;padding:30px;opacity:0.7;margin-top:60px;}
     <div class="card-info">
       <h2 id="nombreJugador"></h2>
       <p id="distanciaJugador"></p>
+      <div id="estadoJugador" class="estado"></div>
     </div>
 
     <div class="acciones">
@@ -135,12 +127,21 @@ footer{text-align:center;padding:30px;opacity:0.7;margin-top:60px;}
   <div id="map"></div>
 </div>
 
-<!-- JUGADOR -->
-<div id="jugador" class="section">
-  <h2>Perfil del Jugador</h2>
+<div id="perfil" class="section">
+  <h2>Mi Perfil</h2>
+  <input type="email" id="loginEmail" placeholder="Email">
+  <input type="password" id="loginPassword" placeholder="Contraseña">
+  <button class="btn" onclick="registrarse()">Registrarse</button>
+  <button class="btn" onclick="iniciarSesion()">Iniciar sesión</button>
+  <button class="btn" onclick="cerrarSesion()">Cerrar sesión</button>
+
+  <hr style="margin:20px 0">
+
   <input type="text" id="perfilNombre" placeholder="Nombre">
-  <input type="text" id="perfilDeporte" placeholder="Deporte favorito">
+  <input type="text" id="perfilDeporte" placeholder="Deporte">
   <button class="btn" onclick="guardarPerfil()">Guardar Perfil</button>
+
+  <p id="usuarioActivo"></p>
 </div>
 
 <footer>© 2026 SportGame</footer>
@@ -150,10 +151,24 @@ footer{text-align:center;padding:30px;opacity:0.7;margin-top:60px;}
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth,onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
-  getFirestore, collection, getDocs, addDoc, 
-  doc, setDoc, query, where 
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  setDoc,
+  updateDoc,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -174,7 +189,7 @@ let indexActual=0;
 let miUbicacion=null;
 let map;
 
-/* GEOLOCALIZACIÓN */
+/* GEO */
 navigator.geolocation.getCurrentPosition(pos=>{
   miUbicacion={
     lat:pos.coords.latitude,
@@ -182,42 +197,105 @@ navigator.geolocation.getCurrentPosition(pos=>{
   };
 });
 
+/* REGISTRO CREA JUGADOR */
+window.registrarse=async function(){
+  const cred=await createUserWithEmailAndPassword(
+    auth,loginEmail.value,loginPassword.value);
+
+  await setDoc(doc(db,"jugadores",cred.user.uid),{
+    nombre:"",
+    deporte:"",
+    lat:null,
+    lng:null,
+    activo:true,
+    lastSeen:new Date(),
+    createdAt:new Date()
+  });
+
+  alert("Usuario registrado");
+};
+
+/* LOGIN */
+window.iniciarSesion=async function(){
+  await signInWithEmailAndPassword(
+    auth,loginEmail.value,loginPassword.value);
+};
+
+/* LOGOUT */
+window.cerrarSesion=async function(){
+  await updateDoc(doc(db,"jugadores",auth.currentUser.uid),{
+    activo:false,
+    lastSeen:new Date()
+  });
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth,async(user)=>{
+  if(user){
+    usuarioActivo.innerText="Conectado como: "+user.email;
+    await updateDoc(doc(db,"jugadores",user.uid),{
+      activo:true,
+      lastSeen:new Date()
+    });
+  }else{
+    usuarioActivo.innerText="No has iniciado sesión";
+  }
+});
+
+/* GUARDAR PERFIL */
+window.guardarPerfil=async function(){
+  if(!auth.currentUser) return alert("Inicia sesión");
+
+  await updateDoc(doc(db,"jugadores",auth.currentUser.uid),{
+    nombre:perfilNombre.value,
+    deporte:perfilDeporte.value,
+    lat:miUbicacion?.lat || null,
+    lng:miUbicacion?.lng || null,
+    lastSeen:new Date()
+  });
+
+  alert("Perfil actualizado");
+};
+
 /* DISTANCIA */
 function calcularDistancia(lat1,lon1,lat2,lon2){
   const R=6371;
   const dLat=(lat2-lat1)*Math.PI/180;
   const dLon=(lon2-lon1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+
-    Math.cos(lat1*Math.PI/180)*
-    Math.cos(lat2*Math.PI/180)*
-    Math.sin(dLon/2)**2;
-  const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  return (R*c).toFixed(1);
+  Math.cos(lat1*Math.PI/180)*
+  Math.cos(lat2*Math.PI/180)*
+  Math.sin(dLon/2)**2;
+  return (R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1);
 }
 
 /* CARGAR JUGADORES */
 async function cargarJugadores(){
   const snap=await getDocs(collection(db,"jugadores"));
-  jugadores=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
+  jugadores=snap.docs.map(d=>({id:d.id,...d.data()}));
   mostrarJugador();
   cargarMapa();
 }
 
-/* MOSTRAR TARJETA */
 function mostrarJugador(){
-  if(jugadores.length===0)return;
+  if(jugadores.length===0) return;
+
   const j=jugadores[indexActual];
 
-  nombreJugador.innerText=j.nombre || "Jugador";
-  fotoJugador.src=j.foto || "https://i.pravatar.cc/400?u="+j.id;
+  nombreJugador.innerText=j.nombre||"Jugador";
+  fotoJugador.src="https://i.pravatar.cc/400?u="+j.id;
 
   if(j.lat && miUbicacion){
-    const dist=calcularDistancia(
+    distanciaJugador.innerText=
+    calcularDistancia(
       miUbicacion.lat,miUbicacion.lng,
       j.lat,j.lng
-    );
-    distanciaJugador.innerText=dist+" km de distancia";
+    )+" km de distancia";
   }
+
+  estadoJugador.innerHTML=j.activo
+    ? "<span class='online'>🟢 En línea</span>"
+    : "<span class='offline'>⚫ Desconectado</span>";
 }
 
 /* LIKE */
@@ -229,9 +307,8 @@ window.darLike=async function(){
   });
   comprobarMatch(j.id);
   siguiente();
-}
+};
 
-/* MATCH */
 async function comprobarMatch(idDestino){
   const q=query(collection(db,"likes"),
     where("from","==",idDestino),
@@ -241,9 +318,8 @@ async function comprobarMatch(idDestino){
   if(!snap.empty) alert("🔥 ¡MATCH!");
 }
 
-/* RECHAZAR */
-window.rechazar=function(){ siguiente(); }
-window.favorito=function(){ alert("⭐ Añadido a favoritos"); }
+window.rechazar=function(){ siguiente(); };
+window.favorito=function(){ alert("⭐ Favorito"); };
 
 function siguiente(){
   indexActual++;
@@ -252,49 +328,31 @@ function siguiente(){
 
 /* MAPA */
 function cargarMapa(){
-  if(!miUbicacion)return;
+  if(!miUbicacion) return;
 
   map=L.map('map').setView([miUbicacion.lat,miUbicacion.lng],12);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap'
-  }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+  .addTo(map);
 
   L.marker([miUbicacion.lat,miUbicacion.lng])
-    .addTo(map).bindPopup("Tú");
+  .addTo(map).bindPopup("Tú");
 
   jugadores.forEach(j=>{
     if(j.lat)
-      L.marker([j.lat,j.lng]).addTo(map)
+      L.marker([j.lat,j.lng])
+      .addTo(map)
       .bindPopup(j.nombre);
   });
 }
 
-/* GUARDAR PERFIL */
-window.guardarPerfil=async function(){
-  const user=auth.currentUser;
-  if(!user)return alert("Inicia sesión");
-
-  await setDoc(doc(db,"jugadores",user.uid),{
-    nombre:perfilNombre.value,
-    deporte:perfilDeporte.value,
-    lat:miUbicacion?.lat || null,
-    lng:miUbicacion?.lng || null,
-    fecha:new Date()
-  });
-
-  alert("Perfil guardado");
-}
-
-/* NAV */
 window.showSection=function(id){
   document.querySelectorAll('.section')
-    .forEach(s=>s.classList.remove('active'));
+  .forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id==="people") cargarJugadores();
-}
+};
 
 </script>
-
 </body>
 </html>
